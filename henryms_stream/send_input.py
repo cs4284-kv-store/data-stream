@@ -44,7 +44,7 @@ def main(cmds_per_pipe):
             for i in range(next_pipe_length):
                 ID += 1
                 value = float(row[data_point + i])
-                print(value)
+                #print(value)
                 pipe.set("%s:%d" % (keybase, ID), "%f" % value)
             pipe.execute()
             data_point += (int(cmds_per_pipe) + 1)
