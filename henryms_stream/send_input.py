@@ -3,26 +3,60 @@ import csv
 import redis
 import sys
 
+
+
+usage = "Error: incorrect usage please use the following flags in any order \n\
+            -l if you want the script to run forever \n\
+            -p [port number]\n\
+            -h [hostname]\n\
+            -pass [password]\n\
+            -f [path to datafile]\n\
+            -n [number of commands sent to pipeline before execution (affects performance)]\n\
+            example: python send_input_multithreaded.py -l -p 6379 -pass guest -h localhost -f datafile.csv -n 25000"
+
+
+
 if(len(sys.argv) < 2):
-    print("error: Usage python send_input.py host port password file.csv [cmds_per_pipeline] -p[continuous]\n \
-            \t ie: python send_imput.py localhost 6379 guest 30000 -p")
+    print(usage)
     sys.exit()
 
-hostname=sys.argv[1]
-portnumber=sys.argv[2]
-passwd=sys.argv[3]
-database = redis.Redis(host=hostname, port=portnumber, password=passwd)
+hostname="nothing"
+portnumber="nohing"
+passwd=""
 persistent = False
-if len(sys.argv) >= 7 and sys.argv[6] == "-p":
-    persistent = True
+cmds_per_pipeline = -1
+data_path = "not_a_file"
 
+
+for arg in range(len(sys.argv)):
+    if sys.argv[arg] == "-p": #port
+        portnumber = sys.argv[arg + 1]
+    if sys.argv[arg] == "-l": # is persistent
+        persistent = True
+    if sys.argv[arg] == "-h": #hostname
+        hostname = sys.argv[arg + 1]
+    if sys.argv[arg] == "-pass":
+        passwd = sys.argv[arg + 1]
+    if sys.argv[arg] == "-n": # number of commands givne to each pipeline before it is sent
+        cmds_per_pipeline = int(sys.argv[arg + 1])
+    if sys.argv[arg] == "-f": # datafile
+        data_path = sys.argv[arg + 1]
+
+
+print("parsed args are : port number = %s, is persistnet = %s hostname = %s cmds Per pipe = %d data_path = %s passwd = %s " %(portnumber, persistent, hostname, cmds_per_pipeline, data_path, passwd))
+
+if cmds_per_pipeline < 1 or passwd == "" or hostname == "nothing" or portnumber == "nothing" or data_path == "not_a_file":
+    print(usage)
+    sys.exit()
+
+
+database = redis.Redis(host=hostname, port=portnumber, password=passwd)
 
 
 #file_contents = 
 def main(cmds_per_pipe):
-    data = open(sys.argv[4], 'r')
+    data = open(data_path, 'r')
     reader = csv.reader(data, delimiter=',')
-    date = "X/X/X"
     first = True
     for row in reader:
         if first == True:
@@ -30,7 +64,7 @@ def main(cmds_per_pipe):
             first = False
             continue
         ID=0
-        keybase = "%s%s" %(row[0],date)
+        keybase = "%s" %(row[0])
         pipe = database.pipeline()
         test_pipe = database.pipeline()
         #print(row[0])
@@ -45,14 +79,14 @@ def main(cmds_per_pipe):
                 ID += 1
                 value = float(row[data_point + i])
                 #print(value)
-                pipe.set("%s:%d" % (keybase, ID), "%f" % value)
+                pipe.set("%s:%d:%d" % (keybase, data_point, ID), "%f" % value)
             pipe.execute()
             data_point += (int(cmds_per_pipe) + 1)
 
 if persistent == True:
     while True:
         print("start")
-        main(int(sys.argv[5]))
+        main(cmds_per_pipeline)
         print("end")
 else :
-    main(int(sys.argv[5]))
+    main(cmds_per_pipeline)

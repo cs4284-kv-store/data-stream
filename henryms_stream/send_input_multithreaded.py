@@ -24,7 +24,7 @@ if(len(sys.argv) < 2):
     sys.exit()
 
 hostname="nothing"
-portnumber="nohing"
+portnumber="nothing"
 passwd=""
 persistent = False
 cmds_per_pipeline = -1
@@ -59,7 +59,7 @@ def send_thread_row(row, cmds_per_pipe):
         ID=0
         keybase = "%s" %(row[0])
         pipe = database.pipeline()
-        print(row[0])
+        #print(row[0])
         #print(len(row))
         round_number = 0.0 # if peristent we add the number of times through the data set to each float value
         data_point = 11
@@ -73,16 +73,16 @@ def send_thread_row(row, cmds_per_pipe):
                 else :
                     next_pipe_length = int(cmds_per_pipe)
                 for i in range(next_pipe_length):
-                   ID += 1
-                   value = float(row[data_point + i]) + round_number
-                   print("row %s %f" %(row[0],value))
-                   pipe.set("%s:%d:%d" % (keybase, pipe_number,ID), "%f" % value)
+                    ID += 1
+                    value = float(row[data_point + i]) + round_number
+                    #print("row %s %f" %(row[0],value))
+                    pipe.set("%s:%d:%d" % (keybase, pipe_number,ID), "%f" % value)
                 pipe.execute()
                 data_point += (int(cmds_per_pipe) + 1)
                 pipe_number += 1
             round_number += 0.001
             data_point = 11
-            if not persitent: ## if not persistnet break out of the loop after the first run
+            if not persistent: ## if not persistnet break out of the loop after the first run
                 break
 
             
@@ -114,11 +114,4 @@ def main(cmds_per_pipe):
     func_time = end - start
     print("done in time %f" % func_time)
         
-if persistent == True:
-    while True:
-        print("start")
-        main(cmds_per_pipeline)
-        print("end")
-else :
-    #print("nothing here")
-    main(cmds_per_pipeline)
+main(cmds_per_pipeline)
