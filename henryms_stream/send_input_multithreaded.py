@@ -4,7 +4,10 @@ import redis
 import sys
 import threading 
 import time 
+from datetime import datetime
 
+
+#print(datetime.utcnow())
 
 
 
@@ -55,18 +58,23 @@ if cmds_per_pipeline < 1 or passwd == "" or hostname == "nothing" or portnumber 
 
 database = redis.Redis(host=hostname, port=portnumber, password=passwd)
 
+
+sensor_list = "sensor_list"
+
+
 def send_thread_row(row, cmds_per_pipe):
         ID=0
         keybase = "%s" %(row[0])
         pipe = database.pipeline()
-        #print(row[0])
+        database.lpush(sensor_list, row[0])
+        
+        print(row[0])
         #print(len(row))
         round_number = 0.0 # if peristent we add the number of times through the data set to each float value
         data_point = 11
+        
         pipe_number = 0
         while True: ##acting as a do while loop for the case when we want the stream to be persistent
-            if round_number == 0.004:
-                print("running in persistnet mode")
             while data_point < (len(row) - 11):
                 if data_point + cmds_per_pipe > len(row):
                     next_pipe_length = data_point - len(row) - 1
@@ -75,8 +83,8 @@ def send_thread_row(row, cmds_per_pipe):
                 for i in range(next_pipe_length):
                     ID += 1
                     value = float(row[data_point + i]) + round_number
-                    #print("row %s %f" %(row[0],value))
-                    pipe.set("%s:%d:%d" % (keybase, pipe_number,ID), "%f" % value)
+                    #print("row %s %s %f" %(row[0],datetime.utcnow(), value))
+                    pipe.set("%s:%s:%d" % (keybase, datetime.utcnow(),ID), "%f" % value)
                 pipe.execute()
                 data_point += (int(cmds_per_pipe) + 1)
                 pipe_number += 1
@@ -85,7 +93,9 @@ def send_thread_row(row, cmds_per_pipe):
             if not persistent: ## if not persistnet break out of the loop after the first run
                 break
 
-            
+
+#print(time.clock())
+
 thread_list = []
 #file_contents = 
 def main(cmds_per_pipe):
@@ -101,17 +111,21 @@ def main(cmds_per_pipe):
         t = threading.Thread(target=send_thread_row, args=(row, cmds_per_pipe))
         thread_list.append(t)
     start = time.clock()
-    print("starting")
+    #print("starting with %d threads" % len(thread_list))
     for thread in thread_list:
         thread.start()
     
+    #time.sleep(10)
+    #print("length of the sensor list %d" % database.llen(sensor_list))
     
-    print("waiting")
+    #print("waiting")
     for thread in thread_list:
         thread.join()
-        print("joining")
+        #print("joining")
     end = time.clock()
     func_time = end - start
     print("done in time %f" % func_time)
-        
+
+    
+
 main(cmds_per_pipeline)
