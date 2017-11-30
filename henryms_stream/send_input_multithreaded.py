@@ -8,8 +8,7 @@ from datetime import datetime
 
 
 #print(datetime.utcnow())
-
-
+#print(len("3C-24:%s" % datetime.utcnow()))
 
 usage = "Error: incorrect usage please use the following flags in any order \n\
             -l if you want the script to run forever \n\
@@ -57,7 +56,7 @@ if cmds_per_pipeline < 1 or passwd == "" or hostname == "nothing" or portnumber 
 
 
 database = redis.Redis(host=hostname, port=portnumber, password=passwd)
-
+database.flushall()
 
 sensor_list = "sensor_list"
 
