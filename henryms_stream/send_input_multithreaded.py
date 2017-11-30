@@ -63,7 +63,7 @@ sensor_list = "sensor_list"
 
 
 def send_thread_row(row, cmds_per_pipe):
-        ID=0
+        
         keybase = "%s" %(row[0])
         pipe = database.pipeline()
         database.lpush(sensor_list, row[0])
@@ -81,10 +81,9 @@ def send_thread_row(row, cmds_per_pipe):
                 else :
                     next_pipe_length = int(cmds_per_pipe)
                 for i in range(next_pipe_length):
-                    ID += 1
                     value = float(row[data_point + i]) + round_number
                     #print("row %s %s %f" %(row[0],datetime.utcnow(), value))
-                    pipe.set("%s:%s:%d" % (keybase, datetime.utcnow(),ID), "%f" % value)
+                    pipe.set("%s:%s" % (keybase, datetime.utcnow()), "%f" % value)
                 pipe.execute()
                 data_point += (int(cmds_per_pipe) + 1)
                 pipe_number += 1
