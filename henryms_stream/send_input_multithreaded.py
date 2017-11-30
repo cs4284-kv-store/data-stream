@@ -77,7 +77,7 @@ def send_thread_row(row, cmds_per_pipe):
         while True: ##acting as a do while loop for the case when we want the stream to be persistent
             while data_point < (len(row) - 11):
                 if data_point + cmds_per_pipe > len(row):
-                    next_pipe_length = data_point - len(row) - 1
+                    next_pipe_length =  len(row) - data_point - 1
                 else :
                     next_pipe_length = int(cmds_per_pipe)
                 for i in range(next_pipe_length):
