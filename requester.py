@@ -11,8 +11,10 @@ for sensor_name in sensor_list:
 	url = "http://localhost:8080/" + sensor_name
 	key = sensor_name + ':' + time_stamp
 	data = []
-	for item in r.keys(pattern = key[0:len(key) - 16] + '*'):
-		data.append(r.get(item))
+	print(list(r.scan_iter(match = key[0:len(key) - 28] + '*')))
+	#for item in r.scan_iter(match = key[0:len(key) - 7] + '*'):
+	#	# data.append(r.get(item))
+	#	print(item)
 	data = map(float, data)
 	if len(data) != 0:
 		s = requests.post(
