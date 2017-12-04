@@ -50,7 +50,7 @@ for arg in range(len(sys.argv)):
 
 print("parsed args are : port number = %s, is persistnet = %s hostname = %s cmds Per pipe = %d data_path = %s passwd = %s " %(portnumber, persistent, hostname, cmds_per_pipeline, data_path, passwd))
 
-if cmds_per_pipeline < 1 or passwd == "" or hostname == "nothing" or portnumber == "nothing" or data_path == "not_a_file":
+if cmds_per_pipeline < 1 or hostname == "nothing" or portnumber == "nothing" or data_path == "not_a_file":
     print(usage)
     sys.exit()
 
