@@ -7,16 +7,16 @@ import time
 r = redis.Redis(host='localhost', port=6379, db=0)
 sensor_list = r.lrange('sensor_list', 0, r.llen('sensor_list'))
 
-time_stamp = str(datetime.datetime.utcnow() - datetime.timedelta(seconds=2))
-
 while 1:
+	time_stamp = str(datetime.datetime.utcnow() - datetime.timedelta(seconds=2))
 	t0 = time.time()
 	for sensor_name in sensor_list:
 		url = "http://localhost:8080/" + sensor_name
-		regex = time_stamp[0:len(time_stamp) - 8] + r'.*\..*\,.*\..*'
+		regex = time_stamp[0:len(time_stamp) - 7] + r'.*\..*\,.*\..*'
 		reg = re.compile(regex)
 		data = r.lrange(sensor_name, 0, -1)
 		times = filter(reg.match, data)
+		print(times)
 		values = []
 		for item in times:
 			values.append(item.split(',')[1])
@@ -35,5 +35,6 @@ while 1:
 			print(s)
 	t1 = time.time()
 	wait = t1 - t0
+	print(1 - wait)
 	if (1 - wait) > 0:
 		time.sleep(1 - wait)
