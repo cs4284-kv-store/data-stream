@@ -69,7 +69,7 @@ def send_thread_row(row, cmds_per_pipe):
         
         print(row[0])
         #print(len(row))
-        round_number = 0.0 # if peristent we add the number of times through the data set to each float value
+        #round_number = 0.0 # if peristent we add the number of times through the data set to each float value
         data_point = 11
         
         pipe_number = 0
@@ -80,13 +80,13 @@ def send_thread_row(row, cmds_per_pipe):
                 else :
                     next_pipe_length = int(cmds_per_pipe)
                 for i in range(next_pipe_length):
-                    value = float(row[data_point + i]) + round_number
+                    value = float(row[data_point + i]) 
                     #print("row %s %s %f" %(row[0],datetime.utcnow(), value))
-                    pipe.set("%s:%s" % (keybase, datetime.utcnow()), "%f" % value)
+                    #pipe.set("%s:%s" % (keybase, datetime.utcnow()), "%f" % value)
+                    pipe.lpush("%s" % keybase, "%s,%f" % (datetime.utcnow(),value))
                 pipe.execute()
                 data_point += (int(cmds_per_pipe) + 1)
                 pipe_number += 1
-            round_number += 0.001
             data_point = 11
             if not persistent: ## if not persistnet break out of the loop after the first run
                 break
