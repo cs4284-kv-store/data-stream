@@ -73,8 +73,10 @@ def send_thread_row(row, cmds_per_pipe):
         data_point = 11
         
         pipe_number = 0
+
         while True: ##acting as a do while loop for the case when we want the stream to be persistent
             while data_point < (len(row) - 11):
+                start_time = time.time()
                 if data_point + cmds_per_pipe > len(row):
                     next_pipe_length =  len(row) - data_point - 1
                 else :
@@ -84,10 +86,14 @@ def send_thread_row(row, cmds_per_pipe):
                     #print("row %s %s %f" %(row[0],datetime.utcnow(), value))
                     #pipe.set("%s:%s" % (keybase, datetime.utcnow()), "%f" % value)
                     pipe.lpush("%s" % keybase, "%s,%f" % (datetime.utcnow(),value))
+                pipe.ltrim("%s" % keybase, 0, cmds_per_pipe * 55)
                 pipe.execute()
+                sleep_for = start_time + 1 - time.time()
+                time.sleep(sleep_for)
                 data_point += (int(cmds_per_pipe) + 1)
                 pipe_number += 1
             data_point = 11
+
             if not persistent: ## if not persistnet break out of the loop after the first run
                 break
 
